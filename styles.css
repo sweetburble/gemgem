@@ -1,0 +1,228 @@
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#selection-buttons,
+#selection-buttons *,
+#settings-panel,
+#settings-panel *,
+.settings-overlay,
+.notify-dialog,
+#loading-spinner-container,
+#loading-spinner-container * {
+    box-sizing: border-box !important;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+#selection-buttons {
+    all: revert;
+    box-sizing: border-box !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    padding: 12px 18px !important;
+    display: flex !important;
+    gap: 10px !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    z-index: 999999 !important;
+    position: absolute !important;
+}
+
+#selection-buttons button {
+    all: revert;
+    box-sizing: border-box !important;
+    background: linear-gradient(to bottom, #ffffff, #fafafa) !important;
+    color: #1a1a1a !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
+    padding: 10px 20px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+    text-decoration: none !important;
+    min-width: auto !important;
+    min-height: auto !important;
+}
+
+#selection-buttons button:hover {
+    background: linear-gradient(to bottom, #ffffff, #f5f5f5) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+#selection-buttons button:active {
+    transform: translateY(0) !important;
+    background: linear-gradient(to bottom, #f8f8f8, #f3f3f3) !important;
+}
+
+.settings-overlay {
+    all: revert;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(1px) !important;
+    z-index: 99999999 !important;
+}
+
+#settings-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+    padding: 32px;
+    border-radius: 24px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+    z-index: 999100000;
+    min-width: 360px;
+    border: 1px solid #e0e0e0;
+}
+
+#settings-panel h2 {
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    color: #1a1a1a;
+    font-weight: 700;
+}
+
+.settings-group {
+    margin-bottom: 20px;
+}
+
+.settings-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.settings-group input,
+.settings-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.settings-group input:focus,
+.settings-group select:focus {
+    border-color: #4834d4;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(72, 52, 212, 0.1);
+}
+
+.settings-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    -webkit-appearance: none;
+}
+
+.settings-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #4834d4;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.settings-buttons button {
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.settings-buttons button.save {
+    background: linear-gradient(135deg, #4834d4, #686de0);
+    color: white;
+    box-shadow: 0 4px 12px rgba(72, 52, 212, 0.2);
+}
+
+.settings-buttons button.save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(72, 52, 212, 0.3);
+}
+
+.settings-buttons button.cancel {
+    background: #f5f5f5;
+    color: #1a1a1a;
+}
+
+.settings-buttons button.cancel:hover {
+    background: #eeeeee;
+}
+
+#loading-spinner-container {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(1px);
+}
+
+#loading-spinner-container div {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top: 3px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.15);
+}
+
+.notify-dialog {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+    padding: 16px 24px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 999100000;
+    max-width: 320px;
+    animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid #e0e0e0;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
