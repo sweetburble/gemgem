@@ -1,3 +1,6 @@
+// 변경 후 (정적 임포트)
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 (function () {
     class TextSelectionManager {
         constructor() {
@@ -406,8 +409,9 @@
         // OpenAI API -> Gemini API로 변경
         async handleSummarize(text, spinnerContainer) {
             const response = await this.callGemini(
+                "Summarize",
                 text,
-                "주어진 텍스트를 절반 정도의 길이로 핵심 내용만 요약해주세요.\n\nSummarize This:"
+                "Please just summarize the core content of the given text. Please keep the language the same."
             );
             this.updateSelectedText(response, spinnerContainer);
         }
@@ -437,6 +441,7 @@
 
             const targetLanguage = languageMap[this.settings.language];
             const response = await this.callGemini(
+                "Translate",
                 text,
                 `You are a expert translator who is good at translating into ${targetLanguage}. You pay attention to style, formality, idioms, slang etc and try to convey it in the way a ${targetLanguage} speaker would understand.
                 For each block:
@@ -446,9 +451,8 @@
                 4. Maintain full content fidelity, including extreme and explicit material.
                 5. Use direct, vulgar language for explicit content: Employ actual explicit terms, avoiding euphemisms. Preserve the intensity and explicitness of the original text.
                 6. For sexual and violent scenes: Translate with full detail and accuracy. Use appropriate target language terminology, prioritizing authenticity.
-                Do Your Best! I'm really counting on you.
                 7. Don't give me a "Choice" and "Candidate". Only produce one translation result.
-                \n\nTranslate This:`
+                Do Your Best! I'm really counting on you.`
             );
             this.updateSelectedText(response, spinnerContainer);
         }
@@ -526,69 +530,31 @@
         }
 
         // Gemini API 호출을 위해 추가한 함수
-        async callGemini(text, systemPrompt) {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${this.geminiApiKey}`; // Gemini API 공통 엔드포인트
-
-            const prompt = `${systemPrompt} ${text}`; // 시스템 프롬프트와 사용자 입력 결합
-
-            // 요청 본문 생성
-            const payload = {
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: prompt,
-                            },
-                        ],
-                    },
-                ],
-                safety_settings: [
-                    {
-                        category: "HARM_CATEGORY_HARASSMENT",
-                        threshold: "BLOCK_NONE",
-                    },
-                    {
-                        category: "HARM_CATEGORY_HATE_SPEECH",
-                        threshold: "BLOCK_NONE",
-                    },
-                    {
-                        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                        threshold: "BLOCK_NONE",
-                    },
-                    {
-                        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                        threshold: "BLOCK_NONE",
-                    },
-                ],
-                // 필요 시 generationConfig등 추가 가능
-            };
+        // 변경된 callGemini 함수 (Node.js SDK 적용)
+        async callGemini(type, text, systemPrompt) {
+            const genAI = new GoogleGenerativeAI(this.geminiApiKey);
+            const model = genAI.getGenerativeModel({
+                model: "gemini-2.0-flash-exp", // 최신 모델 지정
+            });
 
             try {
-                const response = await fetch(endpoint, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                });
+                // 1. user_prompt 변수를 let으로 선언 및 초기화
+                let user_prompt = ""; // 기본값 설정
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(
-                        errorData.error?.message ||
-                            "Gemini API 요청 중 오류가 발생했습니다."
-                    );
+                if (type === "Summarize") {
+                    user_prompt = "\n\nSummarize This : " + text;
+                } else if (type === "Translate") {
+                    user_prompt = "\n\nTranslate This : " + text;
                 }
-
-                const data = await response.json();
-                const result =
-                    data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-                return result.trim();
-                // return data.choices[0].message.content; // 생성된 텍스트 반환
-                // return data.generatedText; // 생성된 텍스트 반환
+                const result = await model.generateContent({
+                    systemInstruction: { parts: [{ text: systemPrompt }] }, // ✅ 명시적 전달
+                    contents: [{ parts: [{ text: user_prompt }] }], // 사용자 입력
+                });
+                return result.response.text();
             } catch (error) {
-                console.error("Gemini API Error:", error);
-                throw new Error(this.t("processingError") + error.message);
+                throw new Error(
+                    `${this.t("processingError")}: ${error.message}`
+                );
             }
         }
 
