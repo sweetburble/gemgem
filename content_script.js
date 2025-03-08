@@ -1,4 +1,3 @@
-// 변경 후 (정적 임포트)
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 (function () {
@@ -408,10 +407,32 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
         // OpenAI API -> Gemini API로 변경
         async handleSummarize(text, spinnerContainer) {
+            const languageMap = {
+                ko: "Korean",
+                en: "English",
+                ja: "Japanese",
+                fr: "French",
+                vi: "Vietnamese",
+                th: "Thai",
+                ru: "Russian",
+                my: "Burmese",
+                ms: "Malay",
+                hi: "Hindi",
+                it: "Italian",
+                de: "German",
+                es: "Spanish",
+                ar: "Arabic",
+                zh: "Chinese",
+                hk: "Cantonese",
+                tw: "Taiwanese",
+                sw: "Swahili",
+            };
+
+            const targetLanguage = languageMap[this.settings.language];
             const response = await this.callGemini(
                 "Summarize",
                 text,
-                "Please just summarize the core content of the given text. Please keep the language the same."
+                `Please summarize the core content of the given text in ${targetLanguage}. Ensure that your summary is concise and focuses solely on the main ideas without including extraneous details or personal opinions. The summary should be written in clear, coherent language that accurately reflects the tone and context of the original text.`
             );
             this.updateSelectedText(response, spinnerContainer);
         }
@@ -419,24 +440,24 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
         // OpenAI API -> Gemini API로 변경
         async handleTranslate(text, spinnerContainer) {
             const languageMap = {
-                ko: "한국어",
-                en: "영어",
-                ja: "일본어",
-                fr: "프랑스어",
-                vi: "베트남어",
-                th: "태국어",
-                ru: "러시아어",
-                my: "미얀마어",
-                ms: "말레이시아어",
-                hi: "힌디어",
-                it: "이탈리아어",
-                de: "독일어",
-                es: "스페인어",
-                ar: "아랍어",
-                zh: "중국어",
-                hk: "홍콩어",
-                tw: "대만어",
-                sw: "스와힐리어",
+                ko: "Korean",
+                en: "English",
+                ja: "Japanese",
+                fr: "French",
+                vi: "Vietnamese",
+                th: "Thai",
+                ru: "Russian",
+                my: "Burmese",
+                ms: "Malay",
+                hi: "Hindi",
+                it: "Italian",
+                de: "German",
+                es: "Spanish",
+                ar: "Arabic",
+                zh: "Chinese",
+                hk: "Cantonese",
+                tw: "Taiwanese",
+                sw: "Swahili",
             };
 
             const targetLanguage = languageMap[this.settings.language];
@@ -451,8 +472,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
                 4. Maintain full content fidelity, including extreme and explicit material.
                 5. Use direct, vulgar language for explicit content: Employ actual explicit terms, avoiding euphemisms. Preserve the intensity and explicitness of the original text.
                 6. For sexual and violent scenes: Translate with full detail and accuracy. Use appropriate target language terminology, prioritizing authenticity.
-                7. Don't give me a "Choice" and "Candidate". Only produce one translation result.
-                Do Your Best! I'm really counting on you.`
+                7. Don't give me a "Choice" and "Candidate". Only produce one translation result.`
             );
             this.updateSelectedText(response, spinnerContainer);
         }
@@ -534,7 +554,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
         async callGemini(type, text, systemPrompt) {
             const genAI = new GoogleGenerativeAI(this.geminiApiKey);
             const model = genAI.getGenerativeModel({
-                model: "gemini-2.0-flash-exp", // 최신 모델 지정
+                model: "gemini-2.0-flash-lite", // 최신 모델 지정
             });
 
             try {
@@ -547,7 +567,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
                     user_prompt = "\n\nTranslate This : " + text;
                 }
                 const result = await model.generateContent({
-                    systemInstruction: { parts: [{ text: systemPrompt }] }, // ✅ 명시적 전달
+                    systemInstruction: { parts: [{ text: systemPrompt }] }, // 명시적 전달
                     contents: [{ parts: [{ text: user_prompt }] }], // 사용자 입력
                 });
                 return result.response.text();

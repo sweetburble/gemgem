@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "GemGem",
-    "version": "1.2",
+    "version": "1.3",
     "description": "Provides summarization, translation, and text-to-speech features using AI",
     "icons": {
         "128": "icon/icon128.png",
@@ -23,11 +23,7 @@
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": [
-                "translations.js",
-                "content_script.js",
-                "dist/content_script.bundle.js"
-            ],
+            "js": ["translations.js", "dist/content_script.bundle.js"],
             "css": ["styles.css"]
         }
     ],
