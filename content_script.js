@@ -1,5 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 (function () {
     class TextSelectionManager {
         constructor() {
@@ -488,7 +486,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            model: "tts-1",
+                            model: "tts-gpt-4o-mini-tts",
                             input: text,
                             voice: "nova",
                             speed: this.settings.speechSpeed,
@@ -549,28 +547,91 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
             return data.choices[0].message.content;
         }
 
-        // Gemini API 호출을 위해 추가한 함수
-        // 변경된 callGemini 함수 (Node.js SDK 적용)
+        // Gemini API 호출을 위해 HTTP API 방식으로 수정한 함수
         async callGemini(type, text, systemPrompt) {
-            const genAI = new GoogleGenerativeAI(this.geminiApiKey);
-            const model = genAI.getGenerativeModel({
-                model: "gemini-2.0-flash-lite", // 최신 모델 지정
-            });
+            const model = "gemini-2.5-flash-lite-preview-06-17";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiApiKey}`;
+
+            let user_prompt = "";
+            if (type === "Summarize") {
+                user_prompt = `Summarize This: ${text}`;
+            } else if (type === "Translate") {
+                user_prompt = `Translate This: ${text}`;
+            }
+
+            // Gemini API가 요구하는 요청 본문 형식
+            const requestBody = {
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }],
+                },
+                contents: [
+                    {
+                        role: "user", // API 명세에 따라 'role'을 명시
+                        parts: [{ text: user_prompt }],
+                    },
+                ],
+                // 번역 프롬프트의 제약 없는 번역 요구사항을 반영하기 위해 안전 설정을 조정
+                safetySettings: [
+                    {
+                        category: "HARM_CATEGORY_HARASSMENT",
+                        threshold: "BLOCK_NONE",
+                    },
+                    {
+                        category: "HARM_CATEGORY_HATE_SPEECH",
+                        threshold: "BLOCK_NONE",
+                    },
+                    {
+                        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold: "BLOCK_NONE",
+                    },
+                    {
+                        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold: "BLOCK_NONE",
+                    },
+                ],
+            };
 
             try {
-                // 1. user_prompt 변수를 let으로 선언 및 초기화
-                let user_prompt = ""; // 기본값 설정
-
-                if (type === "Summarize") {
-                    user_prompt = "\n\nSummarize This : " + text;
-                } else if (type === "Translate") {
-                    user_prompt = "\n\nTranslate This : " + text;
-                }
-                const result = await model.generateContent({
-                    systemInstruction: { parts: [{ text: systemPrompt }] }, // 명시적 전달
-                    contents: [{ parts: [{ text: user_prompt }] }], // 사용자 입력
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestBody),
                 });
-                return result.response.text();
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(
+                        errorData.error?.message ||
+                            "Gemini API 요청 중 오류가 발생했습니다."
+                    );
+                }
+
+                const data = await response.json();
+
+                // API 응답에서 콘텐츠가 차단되었는지 확인
+                if (data.promptFeedback && data.promptFeedback.blockReason) {
+                    throw new Error(
+                        `Request was blocked by the API: ${data.promptFeedback.blockReason}`
+                    );
+                }
+
+                // API 응답에서 생성된 텍스트를 안전하게 추출
+                if (
+                    data.candidates &&
+                    data.candidates[0]?.content?.parts[0]?.text
+                ) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    console.error(
+                        "Unexpected Gemini API response structure:",
+                        data
+                    );
+                    throw new Error(
+                        "Gemini API로부터 유효한 응답을 받지 못했습니다."
+                    );
+                }
             } catch (error) {
                 throw new Error(
                     `${this.t("processingError")}: ${error.message}`

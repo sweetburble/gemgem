@@ -13,16 +13,4 @@ module.exports = {
         outputModule: true, // ES Module 출력 활성화
     },
     target: "es2020", // ES Module 지원 강화
-    module: {
-        rules: [
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                    options: { presets: ["@babel/preset-env"] },
-                },
-            },
-        ],
-    },
 };
