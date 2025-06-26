@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-    entry: "./content_script.js", // 원본 코드 경로
+    entry: "./src/main.js", // 원본 코드 경로
     output: {
         filename: "content_script.bundle.js",
         path: path.resolve(__dirname, "dist"),
